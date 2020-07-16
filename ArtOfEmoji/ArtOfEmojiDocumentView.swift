@@ -1,17 +1,22 @@
-//
-//  ArtOfEmojiDocumentView.swift
-//  ArtOfEmoji
-//
-//  Created by Paweł Jagła on 16/07/2020.
-//  Copyright © 2020 Paweł Jagła. All rights reserved.
-//
-
 import SwiftUI
 
 struct ArtOfEmojiDocumentView: View {
     @ObservedObject var document: ArtOfEmojiDocument
     
     var body: some View {
-        Text("Hello, World!")
+        VStack {
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(ArtOfEmojiDocument.palette.map { String($0) }, id: \.self ) { emoji in
+                        Text(emoji)
+                            .font(Font.system(size: self.defaultEmojiSize))
+                    }
+                }
+            }
+            .padding(.horizontal)
+            Rectangle().foregroundColor(.yellow)
+            .edgesIgnoringSafeArea([.horizontal, .bottom])
+        }
     }
+    private let defaultEmojiSize: CGFloat = 40
 }
