@@ -6,6 +6,10 @@ class ArtOfEmojiDocument: ObservableObject {
     
     @Published private var artOfEmoji: ArtOfEmoji = ArtOfEmoji()
     
+    @Published private(set) var backgroundImage: UIImage?
+    
+    var emojis: [ArtOfEmoji.Emoji] { artOfEmoji.emojis }
+    
     //MARK: - Intent(s)
     
     func addEmoji(_ emoji: String, at location: CGPoint, size: CGFloat){
@@ -24,4 +28,29 @@ class ArtOfEmojiDocument: ObservableObject {
             artOfEmoji.emojis[index].size = Int((CGFloat(artOfEmoji.emojis[index].size) * scale).rounded(.toNearestOrEven))
         }
     }
+    
+    func setBackgroundUrl(_ url: URL?){
+        artOfEmoji.backgroundURL = url?.imageURL
+        fetchBackgroundImageData()
+    }
+    
+    private func fetchBackgroundImageData(){
+        backgroundImage = nil
+        if let url = artOfEmoji.backgroundURL {
+            DispatchQueue.global(qos: .userInitiated).async {
+                if let imageData = try? Data(contentsOf: url) {
+                    DispatchQueue.main.async {
+                        if url == self.artOfEmoji.backgroundURL {
+                            self.backgroundImage = UIImage(data: imageData)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+extension ArtOfEmoji.Emoji {
+    var fontSize: CGFloat { CGFloat(self.size) }
+    var location: CGPoint { CGPoint(x: CGFloat(x), y: CGFloat(y)) }
 }
