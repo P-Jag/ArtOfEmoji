@@ -8,11 +8,11 @@
 
 import Foundation
 
-class ArtOfEmoji {
+struct ArtOfEmoji: Codable {
     var backgroundURL: URL?
     var emojis = [Emoji]()
     
-    struct Emoji: Identifiable {
+    struct Emoji: Identifiable, Codable, Hashable {
         let text: String
         let id: Int
         // 0,0 is a middle of screen
@@ -28,10 +28,24 @@ class ArtOfEmoji {
             self.size = size
         }
     }
+     
+    var json: Data? {
+        return try? JSONEncoder().encode(self)
+    }
+    
+    init?(json: Data?) {
+         if json != nil, let newArtOfEmoji = try? JSONDecoder().decode(ArtOfEmoji.self, from: json!) {
+             self = newArtOfEmoji
+         } else {
+             return nil
+         }
+     }
+    
+    init() { }
     
     private var uniqueEmojiId = 0
     
-    func addEmoji(_ text: String, x: Int, y: Int, size: Int) {
+    mutating func addEmoji(_ text: String, x: Int, y: Int, size: Int) {
         uniqueEmojiId += 1
         emojis.append(Emoji(text: text, id: uniqueEmojiId, x: x, y: y, size: size))
     }

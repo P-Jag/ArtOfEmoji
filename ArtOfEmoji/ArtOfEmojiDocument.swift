@@ -4,7 +4,23 @@ class ArtOfEmojiDocument: ObservableObject {
     
     static let palette: String = "🥩🏊🥁🎯🏖🛌🎈"
     
-    @Published private var artOfEmoji: ArtOfEmoji = ArtOfEmoji()
+//    @Published
+    private var artOfEmoji: ArtOfEmoji {
+        willSet {
+            objectWillChange.send()
+        }
+        
+        didSet {
+            UserDefaults.standard.set(artOfEmoji.json, forKey: ArtOfEmojiDocument.untitled)
+        }
+    }
+    
+    private static var untitled = "ArtOfEmoji.Untitled"
+    
+    init() {
+        artOfEmoji = ArtOfEmoji(json: UserDefaults.standard.data(forKey: ArtOfEmojiDocument.untitled)) ?? ArtOfEmoji()
+        fetchBackgroundImageData()
+    }
     
     @Published private(set) var backgroundImage: UIImage?
     

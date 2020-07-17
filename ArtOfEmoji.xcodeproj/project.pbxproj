@@ -62,6 +62,7 @@
 		CCE2265124C06EF4008F44BE /* ArtOfEmoji */ = {
 			isa = PBXGroup;
 			children = (
+				CCE2266824C07BAC008F44BE /* ArtOfEmoji.swift */,
 				CCE2266624C072B7008F44BE /* ArtOfEmojiDocument.swift */,
 				CCE2265624C06EF4008F44BE /* ArtOfEmojiDocumentView.swift */,
 				CCE2266A24C08B29008F44BE /* EmojiArtExtensions.swift */,
@@ -71,7 +72,6 @@
 				CCE2265D24C06EF8008F44BE /* LaunchScreen.storyboard */,
 				CCE2266024C06EF8008F44BE /* Info.plist */,
 				CCE2265A24C06EF8008F44BE /* Preview Content */,
-				CCE2266824C07BAC008F44BE /* ArtOfEmoji.swift */,
 			);
 			path = ArtOfEmoji;
 			sourceTree = "<group>";
