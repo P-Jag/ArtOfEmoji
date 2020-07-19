@@ -20,6 +20,7 @@ struct ArtOfEmojiDocumentView: View {
                     Color.white.overlay(
                         OptionalImage(uiImage: self.document.backgroundImage)
                             .scaleEffect(self.zoomScale)
+                            .offset(self.panOffset)
                     )
                         .gesture(self.doubleTapToZoom(in: geometry.size))
                     ForEach(self.document.emojis) { emoji in
@@ -29,11 +30,13 @@ struct ArtOfEmojiDocumentView: View {
                     }
             }
             .clipped()
+            .gesture(self.panGesture())
             .gesture(self.zoomGesture())
             .edgesIgnoringSafeArea([.horizontal, .bottom])
             .onDrop(of: ["public.image", "public.text"], isTargeted: nil) { providers, location in
                 var location = geometry.convert(location, from: .global)
                 location = CGPoint(x: location.x - geometry.size.width / 2,y: location.y - geometry.size.height / 2)
+                location = CGPoint(x: location.x - self.panOffset.width, y: location.y - self.panOffset.height)
                 location = CGPoint(x: location.x / self.zoomScale, y: location.y / self.zoomScale)
                 return self.drop(providers: providers, at: location)
                 }
@@ -88,6 +91,7 @@ struct ArtOfEmojiDocumentView: View {
         if let image = image, image.size.width > 0, image.size.height > 0 {
             let hZoom = size.width / image.size.width
             let vZoom = size.height / image.size.height
+            self.steadyStatePanOffset = .zero
             self.steadyStateZoomScale = min(hZoom, vZoom)
         }
     }
@@ -96,6 +100,7 @@ struct ArtOfEmojiDocumentView: View {
         var location = emoji.location
         location = CGPoint(x: location.x + size.width / 2, y: location.y + size.height / 2)
         location = CGPoint(x: location.x * self.zoomScale, y: location.y * self.zoomScale)
+        location = CGPoint(x: location.x + panOffset.width, y: location.y + panOffset.height)
         return location
     }
     
