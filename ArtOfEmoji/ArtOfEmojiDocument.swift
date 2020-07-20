@@ -1,24 +1,20 @@
 import SwiftUI
+import Combine
 
 class ArtOfEmojiDocument: ObservableObject {
     
     static let palette: String = "🥩🏊🥁🎯🏖🛌🎈"
     
-//    @Published
-    private var artOfEmoji: ArtOfEmoji {
-        willSet {
-            objectWillChange.send()
-        }
-        
-        didSet {
-            UserDefaults.standard.set(artOfEmoji.json, forKey: ArtOfEmojiDocument.untitled)
-        }
-    }
+    @Published private var artOfEmoji: ArtOfEmoji
     
     private static var untitled = "ArtOfEmoji.Untitled"
     
+    private var autosaveCancellable: AnyCancellable?
     init() {
         artOfEmoji = ArtOfEmoji(json: UserDefaults.standard.data(forKey: ArtOfEmojiDocument.untitled)) ?? ArtOfEmoji()
+        autosaveCancellable = $artOfEmoji.sink { artOfEmoji in
+            UserDefaults.standard.set(artOfEmoji.json, forKey: ArtOfEmojiDocument.untitled )
+        }
         fetchBackgroundImageData()
     }
     
@@ -45,23 +41,28 @@ class ArtOfEmojiDocument: ObservableObject {
         }
     }
     
-    func setBackgroundUrl(_ url: URL?){
-        artOfEmoji.backgroundURL = url?.imageURL
-        fetchBackgroundImageData()
+    var backgroundURL: URL? {
+        get {
+            artOfEmoji.backgroundURL
+        }
+        set {
+            artOfEmoji.backgroundURL = newValue?.imageURL
+            fetchBackgroundImageData()
+        }
     }
+    
+    private var fetchImageCancellable: AnyCancellable?
     
     private func fetchBackgroundImageData(){
         backgroundImage = nil
         if let url = artOfEmoji.backgroundURL {
-            DispatchQueue.global(qos: .userInitiated).async {
-                if let imageData = try? Data(contentsOf: url) {
-                    DispatchQueue.main.async {
-                        if url == self.artOfEmoji.backgroundURL {
-                            self.backgroundImage = UIImage(data: imageData)
-                        }
-                    }
-                }
-            }
+            fetchImageCancellable?.cancel()
+            let session = URLSession.shared
+            let publisher = session.dataTaskPublisher(for: url)
+                .map { data, URLResponse in UIImage(data: data) }
+                .receive(on: DispatchQueue.main)
+                .replaceError(with: nil)
+           fetchImageCancellable = publisher.assign(to: \ArtOfEmojiDocument.backgroundImage, on: self)
         }
     }
 }
